@@ -71,7 +71,7 @@ app.delete('/recipe/:id', (request, response) => {
 //
 
 // Get table of contents for cookbook
-app.get('/tableOfContents', (request, response) => {
+app.get('/contents', (request, response) => {
   const query = 'SELECT name FROM recipe WHERE is_deleted = 0 ORDER BY id';
   const params = [];
   connection.query(query, params, (error, rows) => {
@@ -83,7 +83,7 @@ app.get('/tableOfContents', (request, response) => {
 });
 
 // Get single recipe page for cookbook
-app.get('/recipe/:id', (request, response) => {
+app.get('/getrecipe/:id', (request, response) => {
   const query = 'SELECT name, description, ingredients, steps FROM recipe WHERE id = ?'';
   const params = [];
   connection.query(query, params, (error, rows) => {
