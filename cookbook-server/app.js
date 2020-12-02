@@ -18,7 +18,7 @@ function rowToObject(row) {
     description: row.description,
     ingredients: row.ingredients,
     steps: row.steps,
-    is_deleted: row.isDeleted,
+    is_deleted: row.is_deleted,
     created_at: row.created_at,
     updated_at: row.updated_at
   };
