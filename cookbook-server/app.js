@@ -13,10 +13,14 @@ connection.connect();
 
 function rowToObject(row) {
   return {
+    id: row.id,
     name: row.name,
     description: row.description,
     ingredients: row.ingredients,
     steps: row.steps,
+    is_deleted: row.isDeleted,
+    created_at: row.created_at,
+    updated_at: row.updated_at
   };
 }
 
