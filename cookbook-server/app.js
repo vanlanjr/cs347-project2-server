@@ -13,7 +13,7 @@ connection.connect();
 
 function rowToObject(row) {
   return {
-   // id: row.id,
+    id: row.id,
     name: row.name,
     description: row.description,
     ingredients: row.ingredients,
@@ -30,7 +30,7 @@ function rowToObjectCategory(row) {
 
 // Get the table of contents -- all names
 app.get('/recipes', (request, response) => {
-  const query = 'SELECT name, description, ingredients, steps, categories FROM recipe WHERE is_deleted = 0 ORDER BY id';
+  const query = 'SELECT id, name, description, ingredients, steps, categories FROM recipe WHERE is_deleted = 0 ORDER BY id';
   const params = [];
   connection.query(query, params, (error, rows) => {
     response.send({
