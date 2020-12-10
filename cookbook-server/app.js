@@ -29,8 +29,8 @@ function rowToObjectCategory(row) {
 }
 
 // Get the table of contents -- all names
-app.get('/contents', (request, response) => {
-  const query = 'SELECT name FROM recipe WHERE is_deleted = 0 ORDER BY id';
+app.get('/recipes', (request, response) => {
+  const query = 'SELECT name, description, ingredients, steps, categories FROM recipe WHERE is_deleted = 0 ORDER BY id';
   const params = [];
   connection.query(query, params, (error, rows) => {
     response.send({
@@ -52,11 +52,23 @@ app.get('/categories', (request, response) => {
   });
 });
 
+// Get a single category
+app.get('/categories/:value', (request, response) => {
+  const query = 'SELECT value FROM category WHERE value = ? ORDER BY id';
+  const params = [request.params.value];
+  connection.query(query, params, (error, rows) => {
+    response.send({
+      ok: true,
+      recipes: rows,
+    });
+  });
+});
+
 // Get a single recipe where the id matches
-app.get('/recipe/:id', (request, response) => {
-  const params = [request.params.id];
+app.get('/recipe/:name', (request, response) => {
+  const params = [request.params.name];
 //  const query = 'SELECT recipe.id, name, description, ingredients, steps, GROUP_CONCAT(category.value) AS categories FROM recipe INNER JOIN (recipecategories INNER JOIN category ON recipecategories.category_id = category.id) ON recipe.id = recipecategories.recipe_id WHERE is_deleted = 0 AND recipe.id = ? ';
-  const query = 'SELECT id, name, description, ingredients, steps, categories FROM recipe WHERE is_deleted = 0 AND recipe.id = ? ';
+  const query = 'SELECT id, name, description, ingredients, steps, categories FROM recipe WHERE is_deleted = 0 AND recipe.name = ? ';
   connection.query(query, params, (error, rows) => {
     response.send({
       ok: true,
