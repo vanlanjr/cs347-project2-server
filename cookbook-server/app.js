@@ -13,31 +13,62 @@ connection.connect();
 
 function rowToObject(row) {
   return {
-    id: row.id,
+   // id: row.id,
     name: row.name,
     description: row.description,
     ingredients: row.ingredients,
     steps: row.steps,
-    is_deleted: row.is_deleted,
-    created_at: row.created_at,
-    updated_at: row.updated_at
+    categories: row.categories
   };
 }
 
-app.get('/recipes', (request, response) => {
-  const query = 'SELECT name, description, ingredients, steps FROM recipe WHERE is_deleted = 0 ORDER BY name; ';
+function rowToObjectCategory(row) {
+  return {
+    value: row.value
+  };
+}
+
+// Get the table of contents -- all names
+app.get('/contents', (request, response) => {
+  const query = 'SELECT name FROM recipe WHERE is_deleted = 0 ORDER BY id';
   const params = [];
   connection.query(query, params, (error, rows) => {
     response.send({
       ok: true,
-      recipes: rows.map(rowToObject),
+      recipes: rows,
     });
   });
 });
 
+// Get the list of categories -- all their values
+app.get('/categories', (request, response) => {
+  const query = 'SELECT value FROM category ORDER BY id';
+  const params = [];
+  connection.query(query, params, (error, rows) => {
+    response.send({
+      ok: true,
+      recipes: rows.map(rowToObjectCategory),
+    });
+  });
+});
+
+// Get a single recipe where the id matches
+app.get('/recipe/:id', (request, response) => {
+  const params = [request.params.id];
+//  const query = 'SELECT recipe.id, name, description, ingredients, steps, GROUP_CONCAT(category.value) AS categories FROM recipe INNER JOIN (recipecategories INNER JOIN category ON recipecategories.category_id = category.id) ON recipe.id = recipecategories.recipe_id WHERE is_deleted = 0 AND recipe.id = ? ';
+  const query = 'SELECT id, name, description, ingredients, steps, categories FROM recipe WHERE is_deleted = 0 AND recipe.id = ? ';
+  connection.query(query, params, (error, rows) => {
+    response.send({
+      ok: true,
+      recipe: rows.map(rowToObject),
+    });
+  });
+});
+
+// Insert new recipe into database
 app.post('/recipe', (request, response) => {
-  const query = 'INSERT INTO recipe(name, description, ingredients, steps) VALUES (?, ?, ?, ?); ';
-  const params = [request.body.name, request.body.description, request.body.ingredients, request.body.steps];
+  const query = 'INSERT INTO recipe(name, description, ingredients, steps, categories) VALUES (?, ?, ?, ?, ?); ';
+  const params = [request.body.name, request.body.description, request.body.ingredients, request.body.steps, request.body.categories];
   connection.query(query, params, (error, result) => {
     if (error) {
       console.log(error);
@@ -50,9 +81,11 @@ app.post('/recipe', (request, response) => {
   });
 });
 
+
+// Update a recipe in the database
 app.patch('/recipe/:id', (request, response) => {
-  const query = 'UPDATE recipe SET name = ?, description = ?, ingredients = ?, steps = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
-  const params = [request.body.name, request.body.description, request.body.ingredients, request.body.steps, request.params.id];
+  const query = 'UPDATE recipe SET name = ?, description = ?, ingredients = ?, steps = ?, categories = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
+  const params = [request.body.name, request.body.description, request.body.ingredients, request.body.steps, request.body.categories , request.params.id];
   connection.query(query, params, (error, result) => {
     response.send({
       ok: true,
@@ -60,6 +93,7 @@ app.patch('/recipe/:id', (request, response) => {
   });
 });
 
+// Delete a recipe from the database
 app.delete('/recipe/:id', (request, response) => {
   const query = 'UPDATE recipe SET is_deleted = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
   const params = [request.params.id];
@@ -70,35 +104,7 @@ app.delete('/recipe/:id', (request, response) => {
   });
 });
 
-//
-// Below are functions for my app.
-//
-
-// Get table of contents for cookbook
-app.get('/contents', (request, response) => {
-  const query = 'SELECT name FROM recipe WHERE is_deleted = 0 ORDER BY id';
-  const params = [];
-  connection.query(query, params, (error, rows) => {
-    response.send({
-      ok: true,
-      recipes: rows.map(rowToObject),
-    });
-  });
-});
-
-// Get single recipe page for cookbook
-app.get('/getrecipe/:id', (request, response) => {
-  const query = 'SELECT name, description, ingredients, steps FROM recipe WHERE id = ?'';
-  const params = [];
-  connection.query(query, params, (error, rows) => {
-    response.send({
-      ok: true,
-      recipes: rows.map(rowToObject),
-    });
-  });
-});
-
 const port = 3443;
 app.listen(port, () => {
-	console.log('We are live');
+	console.log('We are live on port 3443');
 });
