@@ -30,7 +30,7 @@ function rowToObjectCategory(row) {
 
 // Get the table of contents -- all names
 app.get('/recipes', (request, response) => {
-  const query = 'SELECT id, name, description, ingredients, steps, categories FROM recipe WHERE is_deleted = 0 ORDER BY id';
+  const query = 'SELECT id, name, description, ingredients, steps FROM recipe WHERE is_deleted = 0 ORDER BY id';
   const params = [];
   connection.query(query, params, (error, rows) => {
     response.send({
@@ -79,8 +79,8 @@ app.get('/recipe/:name', (request, response) => {
 
 // Insert new recipe into database
 app.post('/recipe', (request, response) => {
-  const query = 'INSERT INTO recipe(name, description, ingredients, steps, categories) VALUES (?, ?, ?, ?, ?); ';
-  const params = [request.body.name, request.body.description, request.body.ingredients, request.body.steps, request.body.categories];
+  const query = 'INSERT INTO recipe(name, description, ingredients, steps) VALUES (?, ?, ?, ?); ';
+  const params = [request.body.name, request.body.description, request.body.ingredients, request.body.steps];
   connection.query(query, params, (error, result) => {
     if (error) {
       console.log(error);
@@ -96,8 +96,8 @@ app.post('/recipe', (request, response) => {
 
 // Update a recipe in the database
 app.patch('/recipe/:id', (request, response) => {
-  const query = 'UPDATE recipe SET name = ?, description = ?, ingredients = ?, steps = ?, categories = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
-  const params = [request.body.name, request.body.description, request.body.ingredients, request.body.steps, request.body.categories , request.params.id];
+  const query = 'UPDATE recipe SET name = ?, description = ?, ingredients = ?, steps = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?';
+  const params = [request.body.name, request.body.description, request.body.ingredients, request.body.steps, request.params.id];
   connection.query(query, params, (error, result) => {
     response.send({
       ok: true,
