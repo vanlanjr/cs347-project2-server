@@ -40,35 +40,34 @@ app.get('/recipes', (request, response) => {
   });
 });
 
-// Get the list of categories -- all their values
-app.get('/categories', (request, response) => {
-  const query = 'SELECT value FROM category ORDER BY id';
-  const params = [];
-  connection.query(query, params, (error, rows) => {
-    response.send({
-      ok: true,
-      recipes: rows.map(rowToObjectCategory),
-    });
-  });
-});
-
-// Get a single category
-app.get('/categories/:value', (request, response) => {
-  const query = 'SELECT value FROM category WHERE value = ? ORDER BY id';
-  const params = [request.params.value];
-  connection.query(query, params, (error, rows) => {
-    response.send({
-      ok: true,
-      recipes: rows,
-    });
-  });
-});
-
 // Get a single recipe where the id matches
 app.get('/recipe/:name', (request, response) => {
   const params = [request.params.name];
-//  const query = 'SELECT recipe.id, name, description, ingredients, steps, GROUP_CONCAT(category.value) AS categories FROM recipe INNER JOIN (recipecategories INNER JOIN category ON recipecategories.category_id = category.id) ON recipe.id = recipecategories.recipe_id WHERE is_deleted = 0 AND recipe.id = ? ';
-  const query = 'SELECT id, name, description, ingredients, steps, categories FROM recipe WHERE is_deleted = 0 AND recipe.name = ? ';
+  const query = 'SELECT id, name, description, ingredients, steps FROM recipe WHERE is_deleted = 0 AND recipe.name = ? ';
+  connection.query(query, params, (error, rows) => {
+    response.send({
+      ok: true,
+      recipe: rows.map(rowToObject),
+    });
+  });
+});
+
+// Get the next recipe
+app.get('/recipe/next/:id', (request, response) => {
+  const params = [request.params.id];
+  const query = 'select id from recipe where id = (select min(id) from recipe where id > ?)';
+  connection.query(query, params, (error, rows) => {
+    response.send({
+      ok: true,
+      recipe: rows,
+    });
+  });
+});
+
+// Get the previous recipe
+app.get('/recipe/prev/:id', (request, response) => {
+  const params = [request.params.id];
+  const query = 'select * from recipe where id = (select max(id) from recipe where id < ?)';
   connection.query(query, params, (error, rows) => {
     response.send({
       ok: true,
@@ -120,3 +119,4 @@ const port = 3443;
 app.listen(port, () => {
 	console.log('We are live on port 3443');
 });
+
